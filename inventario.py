@@ -2,10 +2,11 @@
 
 import netsnmp
 
-netsnmp.snmpwalk(
+resultado = netsnmp.snmpwalk(
     'sysUpTime',
     Version = 2,
     DestHost = "localhost",
     Community = "public"
     )
 
+print resultado
