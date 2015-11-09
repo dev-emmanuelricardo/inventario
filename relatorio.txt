@@ -1,4 +1,27 @@
-Mais uma coisinha
-Outra coisinha
-Adicionado pelo script novamente
-Mais umalinha
+
+..:: RELATORIO DE HOSTS E CONFIGURAÇOES :::..
+Data:  8/11/2015 
+
+
+* sistema_operacional: Linux emmanuel-Lenovo-G460 3.16.0-31-generic #43~14.04.1-Ubuntu SMP Tue Mar 10 20:13:38 UTC 2015 x86_64
+* processador:  Intel(R) Core(TM) i3 CPU       M 380  @ 2.53GHz
+* RAM_total: 3843832 KB
+* RAM_disponivel: 720968 KB
+
+..:: RELATORIO DE HOSTS E CONFIGURAÇOES :::..
+Data:  8/11/2015 
+
+
+* sistema_operacional: Linux emmanuel-Lenovo-G460 3.16.0-31-generic #43~14.04.1-Ubuntu SMP Tue Mar 10 20:13:38 UTC 2015 x86_64
+* processador:  Intel(R) Core(TM) i3 CPU       M 380  @ 2.53GHz
+* RAM_total: 3843832 KB
+* RAM_disponivel: 1079708 KB
+
+..:: RELATORIO DE HOSTS E CONFIGURAÇOES :::..
+Data:  8/11/2015 
+
+
+* sistema_operacional: Linux emmanuel-Lenovo-G460 3.16.0-31-generic #43~14.04.1-Ubuntu SMP Tue Mar 10 20:13:38 UTC 2015 x86_64
+* processador:  Intel(R) Core(TM) i3 CPU       M 380  @ 2.53GHz
+* RAM_total: 3843832 KB
+* RAM_disponivel: 1122708 KB
