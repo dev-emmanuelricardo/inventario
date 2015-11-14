@@ -46,7 +46,7 @@ def gravarVarreduraEmArquivo():
         print "Nao ha informaçoes para serem gravadas. Execute a varredura antes."
         return False
 
-def gravarComparacaoEmArquivo():
+#def gravarComparacaoEmArquivo():
 
 
 def mostrarListaHostsVarredura():
@@ -167,7 +167,7 @@ while op != '8':
         if not gravarVarreduraEmArquivo():
             continue
 
-    elif op == '6': # Realizar verificaçao de versões de SO
+    elif op == '6': # Realizar verificaçao de versões de SO -- teste
         print ""
 
     elif op == '7': # Gravar verificaçao de versões de SO em disco
