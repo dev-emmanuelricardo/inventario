@@ -10,13 +10,16 @@ import datetime
 
 # Variaveis de configuraçao
 file = "/home/emmanuel/Documentos/faculdade/Gerencia_redes/inventario/relatorio.txt"
-fileComp = "/home/emmanuel/Documentos/faculdade/Gerencia_redes/inventario/comparacao.txt"
+#fileComp = "/home/emmanuel/Documentos/faculdade/Gerencia_redes/inventario/comparacao.txt"
 dataAtual = datetime.datetime.now()
 dataBr =("Data:  %s/%s/%s" % (dataAtual.day, dataAtual.month, dataAtual.year) )
 listaHosts = []
-listaInventario = []
-listaComparacao = ""
+listaInventario = {}
+sublistInventario = {}
+listaComparacao = {}
 arq = ""
+maiorKernel = ""
+maiorKernelHost = ""
 
 var = commands.getoutput("figlet Inventario UNIRN")
 print var
@@ -28,40 +31,43 @@ def gravarVarreduraEmArquivo():
             lista = []
             arq.write("\n..:: RELATORIO DE HOSTS E CONFIGURAÇOES :::..\n")
             arq.write(dataBr+" \n\n\n")
-            for valor in listaInventario:
-                arq.write("* "+valor+"\n")
-            arq.close();
+            for x in listaInventario:
+                arq.write("::: "+x+" :::")
+                arq.write("\n")
+                for k, v in listaInventario[x].iteritems():
+                    print arq.write(k+": "+v+"\n")
+                arq.write("\n")
+                arq.write("\n")
         else:
-            for valor in listaInventario:
-                arq = open(file, "w")
-                lista = []
-                arq.write("\n..:: RELATORIO DE HOSTS E CONFIGURAÇOES :::..\n")
-                arq.write(dataBr+" \n\n\n")
-                for valor in listaInventario:
-                    arq.write("* "+valor+"\n")
-            arq.close();
+            arq = open(file, "w")
+            arq.write("\n..:: RELATORIO DE HOSTS E CONFIGURAÇOES :::..\n")
+            arq.write(dataBr+" \n\n\n")
+            for x in listaInventario:
+                arq.write("::: "+x+" :::")
+                arq.write("\n")
+                for k, v in listaInventario[x].iteritems():
+                    print arq.write(k+": "+v+"\n")
+                arq.write("\n")
+                arq.write("\n")
+        arq.close();
         print "Relatório gerado..."
-        return True
     else:
         print "Nao ha informaçoes para serem gravadas. Execute a varredura antes."
-        return False
-
-#def gravarComparacaoEmArquivo():
-
 
 def mostrarListaHostsVarredura():
     tamanho = len(listaHosts)
     contador = 0
     if(tamanho > 0):
-        print ("::: Lista de Hosts (%s):::" % tamanho) 
+        print ("::: Lista de Hosts (total de %s host(s) na lista):::" % tamanho) 
         for hostIP in listaHosts:
             contador = contador + 1
             print "("+str(contador)+") "+hostIP
     else:
         print "Não existem hosts na lista de varredura :::"
-
-
+#
 def mostrarMenu():
+    """ Mostra o menu de opções do programa """
+
     print "MENU ::"
     print "(1) -> Adicionar host na lista de varredura"
     print "(2) -> Remover host da lista de varredura"
@@ -69,14 +75,23 @@ def mostrarMenu():
     print "(4) -> Realizar varredura na rede"
     print "(5) -> Gravar informaçoes da varredura em disco"
     print "(6) -> Realizar verificaçao de versões de SO"
-    print "(7) -> Gravar verificaçao de versões de SO em disco"
-    print "(8) -> Sair"
+    print "(7) -> Sair"
     print
+
+def realizarBusca(propriedade, host):
+    resultadoSys = netsnmp.snmpget(
+        propriedade,
+        Version = 2,
+        DestHost = host,
+        Community = "public"
+    )
+
+    return resultadoSys
     
 mostrarMenu()
 op = raw_input("Escolha uma opçao: ")
 print
-while op != '8':
+while op != '7':
     
     if op == '1': # Adicionar host na lista de varredura
         ip_host = raw_input("Informe o IP do host: ")
@@ -85,100 +100,99 @@ while op != '8':
         mostrarListaHostsVarredura()
         print
         indexEscolhido = raw_input("Digite o número do host que deseja apagar: ")
-        listaHosts.pop(int(indexEscolhido)-1)
+        try:
+            listaHosts[int(indexEscolhido)-1]
+            listaHosts.pop(int(indexEscolhido)-1)
+        except IndexError:
+            print
+            print "Não existe host nessa posição."            
 
     elif op == '3': # Ver lista de hosts para varredura
         mostrarListaHostsVarredura()
 
     elif op == '4': # Realizar varredura na rede
+
         if(len(listaHosts) > 0):
             for host in listaHosts:
+                sublistInventario = {}
+                print
                 print "::::::::::::::::::::::::"
                 print "Host: "+host
                 print dataBr
                 print "::::::::::::::::::::::::"
                 print       
-                
-                resultadoSys = netsnmp.snmpget(
-                    'sysDescr.0',
-                    Version = 2,
-                    DestHost = host,
-                    Community = "public"
-                )
-                
-                #listaInventario.append("teste: "+str(resultadoSys)[2:-3])
-                versao = str(resultadoSys).split(" ")[2].split("-")[0]
-                listaComparacao = {host: versao}
                 ##
-                resultadoSys = netsnmp.snmpget(
-                    'sysDescr.0',
-                    Version = 2,
-                    DestHost = host,
-                    Community = "public"
-                )
-                
-                listaInventario.append("sistema_operacional: "+str(resultadoSys)[2:-3])
+                resultadoSys = realizarBusca("sysDescr.0", host)
+                versao = str(resultadoSys)[2:-3].split(" ")[2].split("-")[0] # 2.16.3
+                listaComparacao[host] = versao
+                ##
+                sublistInventario ["sistema_operacional"] = str(resultadoSys)[2:-3]
+                listaInventario[host] = sublistInventario
                 print "* Sistema Operacional: "+str(resultadoSys)[2:-3]
                 ##
-                resultadoProc = netsnmp.snmpget(
-                    '.1.3.6.1.2.1.25.3.2.1.3.196608',
-                    Version = 2,
-                    DestHost = host,
-                    Community = "public"
-                )
-
-                listaInventario.append("processador: "+str(resultadoProc).split(":")[1][:-3])
-                print "* Processador: "+str(resultadoProc).split(":")[1][:-3]
+                resultadoProc = realizarBusca(".1.3.6.1.2.1.25.3.2.1.3.196608", host)
+                stringProcessador = str(resultadoProc)
+                if "None" in stringProcessador:
+                    stringProcessador = "Nao Disponivel"
+                    sublistInventario ["processador"] = "Nao disponivel"
+                    listaInventario[host].update(sublistInventario)
+                else:
+                    stringProcessador = stringProcessador[2:-3]
+                    sublistInventario ["processador"] = stringProcessador
+                    listaInventario[host].update(sublistInventario)
+                     
+                print "* Processador: "+stringProcessador
                 ##
-                resultadoMem = netsnmp.snmpget(
-                    'memTotalReal.0',
-                    Version = 2,
-                    DestHost = host,
-                    Community = "public"
-                )
-
-                listaInventario.append("RAM_total: "+str(resultadoMem).split("'")[1]+" KB")
-                print "* Memoria RAM (total): "+str(resultadoMem).split("'")[1]+" KB"
+                resultadoMem = realizarBusca("memTotalReal.0", host)
+                sublistInventario ["RAM_total"] = str(resultadoMem).split("'")[1]+" KB"
+                listaInventario[host].update(sublistInventario)
+                print "* Memoria RAM (total): "+str(resultadoMem)[2:-3]+" KB"
                 ##
-                resultadoMemDisp = netsnmp.snmpget(
-                    'memAvailReal.0',
-                    Version = 2,
-                    DestHost = host,
-                    Community = "public"
-                )
-
-                listaInventario.append("RAM_disponivel: "+str(resultadoMemDisp).split("'")[1]+" KB")
-                print "* Memoria RAM (disponivel): "+str(resultadoMemDisp).split("'")[1]+" KB"
+                resultadoMemDisp = realizarBusca("memAvailReal.0", host)
+                sublistInventario["RAM_disponivel"] = str(resultadoMemDisp).split("'")[1]+" KB"
+                listaInventario[host].update(sublistInventario)
+                print "* Memoria RAM (disponivel): "+str(resultadoMemDisp)[2:-3]+" KB"
                 ##
-                resultadoDisk = netsnmp.snmpget(
-                    'dskTotal.1',
-                    Version = 2,
-                    DestHost = host,
-                    Community = "public"
-                )
-
-                print "* Disco Rigido (total): "+str(resultadoDisk)
-                print "* Disco Rigido (disponivel): "+str(resultadoDisk)
                 print ":::::::       :::::::"
+                
         else:
-            print "Não existem hosts na lista. Adicione pelo menos um host na lista"
+            print "Não existem hosts na lista de varredura. Adicione pelo menos um host na lista"
 
     elif op == '5': # Gravar informaçoes da varredura em disco
-        if not gravarVarreduraEmArquivo():
-            continue
+        gravarVarreduraEmArquivo()
+            
+    elif op == '6': # Realizar verificação nas versões do kernel dos SO
+        if(len(listaComparacao) > 0):
+            v1 = "0.0.0"
+            for item in listaComparacao:
+                v2 = listaComparacao[item]
 
-    elif op == '6': # Realizar verificaçao de versões de SO -- teste
+                v1list = v1.split('.')
+                v2list = v2.split('.')
+
+                for i in range(len(v1list)):
+                    if v1list[i] < v2list[i]: 
+                        maiorKernelHost = item
+                        maiorKernel = listaComparacao[item]
+                        v1 = maiorKernel
+                        break
+                    elif v2list[i] < v1list[i]:
+                        maiorKernelHost = item
+                        maiorKernel = listaComparacao[item]
+                        v1 = maiorKernel
+                        break
+                    else:
+                        continue
+            print
+            print ":::: RESULTADO DA COMPARAÇÃO ::::"
+            print "Host com kernel do SO mais atual: "+maiorKernelHost
+            print "Versão do kernel: "+maiorKernel
+        else:
+            print "Para realizar a comparação nas versões de SO você deve antes fazer uma varredura."
+
+    elif op == '7': # Sair do programa
         print ""
 
-    elif op == '7': # Gravar verificaçao de versões de SO em disco
-        print ""
-
-    elif op == '8': # Adicionar host na lista de hosts
-        print ""
-
-    elif op == '9': # para teste
-        for item in listaComparacao:
-            print item+" - "+listaComparacao[item]
     print
     mostrarMenu()
 
