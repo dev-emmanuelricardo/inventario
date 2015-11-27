@@ -21,7 +21,7 @@ arq = ""
 maiorKernel = ""
 maiorKernelHost = ""
 
-var = commands.getoutput("figlet Inventario UNIRN")
+var = commands.getoutput("figlet pyinfo Inventario")
 print var
 
 def gravarVarreduraEmArquivo():
